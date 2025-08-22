@@ -1,6 +1,7 @@
+import type { Voter } from "../types/ethers-contracts/Voter.js";
+
 import { expect } from "chai";
 import { network } from "hardhat";
-import { Voter } from "../types/ethers-contracts/Voter.js";
 
 const { ethers } = await network.connect();
 
@@ -10,8 +11,9 @@ describe("Testing Voter Connect", () => {
   beforeEach(async () => {
     voter = await ethers.deployContract("Voter");
   });
+
   it("Should create a poll", async () => {
-    const poll = await voter.createPoll("This is a testing poll", [
+    await voter.createPoll("This is a testing poll", [
       "Candidate 1",
       "Candidate 2",
     ]);
