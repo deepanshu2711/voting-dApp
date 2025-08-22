@@ -25,12 +25,20 @@ contract Voter {
 
     //like a logger message stored on blochkchain
     event PollCreated(uint pollId, string title);
+    event Voted(uint pollId, address voter, uint candidateId);
+
+    //storage → permanent on blockchain
+    //memory → temporary, function-lifetime
+    //calldata → temporary, read-only, cheaper
+
+
+    //Value types → don’t need memory/storage.
+    //Reference types → must explicitly use memory, storage, or calldata.
 
     //create a new poll with candidates name
-
-    function createPoll(string title, string[] candidateNames) public {
+    function createPoll(string calldata title, string[] calldata candidateNames) public {
         pollsCount++;
-        Poll p = polls[pollsCount]
+        Poll storage p = polls[pollsCount];
         p.id = pollsCount;
         p.title = title;
         p.active = true;
@@ -42,6 +50,42 @@ contract Voter {
 
         //when you emit an event it get written in a blockchain logs
         //Apps outside the blockchain can watch for it and react.
-        emit PollCreated(pollsCount,title)
+        emit PollCreated(pollsCount,title);
+    }
+
+    function vote(uint pollId, uint candidateId) public {
+      Poll storage p = polls[pollId];
+      require(p.active,"Poll not active");
+      require(!p.voters[msg.sender],"Already voted in this Poll");
+      require(candidateId > 0 && candidateId <= p.candidatesCount, "Invalid Candidate");
+
+      p.voters[msg.sender] = true;
+      p.candidates[candidateId].voteCount++;
+
+      emit Voted(pollId, msg.sender, candidateId)
+    }
+
+    //get candidated list from a poll
+    function getPollCandidated(uint pollId) public view returns(Candidate[] memory) {
+      Poll storage p = polls[pollId];
+      retun p.candidates;
+    }
+
+    //get candidate details from a poll
+    function getCandidate(uint pollId, uint candidateId) public view returns(uint,string,uint){
+      Poll p = polls[pollId];
+      require(candidateId > 0 && candidateId <= p.candidateId, 'Invalid candidate');
+      Candidate memory c = p.candidates[candidateId];
+      return (c.id, c.name, c.voteCount);
+    }
+
+    //get number of candidates in a poll
+    function getCandidateCount(uint pollId) public view returns(uint){
+      return polls[pollId].candidatesCount;
+    }
+
+     // deactivate poll 
+    function closePoll(uint _pollId) public {
+        polls[pollId].active = false;
     }
 }
