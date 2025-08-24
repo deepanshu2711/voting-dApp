@@ -8,29 +8,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Wallet, AlertCircle } from "lucide-react";
-import { useWeb3 } from "@/hooks/use-web3";
+import { Wallet } from "lucide-react";
 
-export function WalletConnect() {
-  const { isConnected, address, isLoading, error, connectWallet } = useWeb3();
+interface WalletConnectInterface {
+  connect: () => void;
+}
 
-  if (isConnected && address) {
-    return (
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-2">
-            <Wallet className="w-6 h-6 text-primary" />
-          </div>
-          <CardTitle className="text-lg">Wallet Connected</CardTitle>
-          <CardDescription>
-            {address.slice(0, 6)}...{address.slice(-4)}
-          </CardDescription>
-        </CardHeader>
-      </Card>
-    );
-  }
-
+export function WalletConnect({ connect }: WalletConnectInterface) {
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
@@ -44,19 +28,8 @@ export function WalletConnect() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {error && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-        <Button
-          onClick={connectWallet}
-          disabled={isLoading}
-          className="w-full"
-          size="lg"
-        >
-          {isLoading ? "Connecting..." : "Connect MetaMask"}
+        <Button onClick={connect} className="w-full cursor-pointer" size="lg">
+          Connect Wallet
         </Button>
       </CardContent>
     </Card>

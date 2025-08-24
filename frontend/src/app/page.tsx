@@ -6,11 +6,14 @@ import { Plus, Vote, BarChart3 } from "lucide-react";
 import { PollsList } from "@/components/polls-list";
 import { CreatePollForm } from "@/components/create-poll-form";
 import { ResultsDashboard } from "@/components/results-dashboard";
+import { WalletConnect } from "@/components/wallet-connect";
+import { useConnectWallet } from "@/hooks/useConnectWallet";
 
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState<"polls" | "create" | "results">(
     "polls"
   );
+  const { connect, address } = useConnectWallet();
 
   return (
     <div className="min-h-screen bg-background">
@@ -25,42 +28,48 @@ export default function HomePage() {
           </p>
         </div>
 
-        <div className="space-y-8">
-          <div className="flex justify-center">
-            <div className="flex items-center gap-2 p-1 bg-muted rounded-lg">
-              <Button
-                variant={activeTab === "polls" ? "default" : "ghost"}
-                onClick={() => setActiveTab("polls")}
-                className="flex items-center gap-2"
-              >
-                <Vote className="w-4 h-4" />
-                View Polls
-              </Button>
-              <Button
-                variant={activeTab === "create" ? "default" : "ghost"}
-                onClick={() => setActiveTab("create")}
-                className="flex items-center gap-2"
-              >
-                <Plus className="w-4 h-4" />
-                Create Poll
-              </Button>
-              <Button
-                variant={activeTab === "results" ? "default" : "ghost"}
-                onClick={() => setActiveTab("results")}
-                className="flex items-center gap-2"
-              >
-                <BarChart3 className="w-4 h-4" />
-                Results
-              </Button>
+        {!address ? (
+          <div className="flex items-center justify-center">
+            <WalletConnect connect={connect} />
+          </div>
+        ) : (
+          <div className="space-y-8">
+            <div className="flex justify-center">
+              <div className="flex items-center gap-2 p-1 bg-muted rounded-lg">
+                <Button
+                  variant={activeTab === "polls" ? "default" : "ghost"}
+                  onClick={() => setActiveTab("polls")}
+                  className="flex items-center gap-2"
+                >
+                  <Vote className="w-4 h-4" />
+                  View Polls
+                </Button>
+                <Button
+                  variant={activeTab === "create" ? "default" : "ghost"}
+                  onClick={() => setActiveTab("create")}
+                  className="flex items-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Create Poll
+                </Button>
+                <Button
+                  variant={activeTab === "results" ? "default" : "ghost"}
+                  onClick={() => setActiveTab("results")}
+                  className="flex items-center gap-2"
+                >
+                  <BarChart3 className="w-4 h-4" />
+                  Results
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex justify-center">
+              {activeTab === "polls" && <PollsList />}
+              {activeTab === "create" && <CreatePollForm />}
+              {activeTab === "results" && <ResultsDashboard />}
             </div>
           </div>
-
-          <div className="flex justify-center">
-            {activeTab === "polls" && <PollsList />}
-            {activeTab === "create" && <CreatePollForm />}
-            {activeTab === "results" && <ResultsDashboard />}
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
