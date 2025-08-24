@@ -53,4 +53,11 @@ describe("Testing Voter Connect", () => {
 
     expect(poll.active).to.equal(false);
   });
+
+  it("Should get all polls", async () => {
+    await voter.createPoll("Another poll", ["A", "B", "C"]);
+    const polls = await voter.getAllPolls();
+
+    expect(polls.length).to.equal(2);
+  });
 });

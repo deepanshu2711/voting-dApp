@@ -19,6 +19,13 @@ contract Voter {
         bool active;
     }
 
+    struct PollInfo {
+        uint id;
+        string title;
+        uint candidatesCount;
+        bool active;
+    }
+
     //store all polls like a dictionary
     mapping(uint => Poll) public polls;
     uint public pollsCount;
@@ -72,6 +79,22 @@ contract Voter {
         p.candidates[candidateId].voteCount++;
 
         emit Voted(pollId, msg.sender, candidateId);
+    }
+
+    //get all polls
+
+    function getAllPolls() public view returns (PollInfo[] memory) {
+        PollInfo[] memory result = new PollInfo[](pollsCount);
+        for (uint i = 1; i <= pollsCount; i++) {
+            Poll storage p = polls[i];
+            result[i - 1] = PollInfo({
+                id: p.id,
+                title: p.title,
+                candidatesCount: p.candidatesCount,
+                active: p.active
+            });
+        }
+        return result;
     }
 
     //get candidated list from a poll
