@@ -1,0 +1,39 @@
+{
+  "_format": "hh3-sol-build-info-1",
+  "id": "solc-0_8_28-5e3db96b797aed2de12cae89fe0b8ce05e42273a",
+  "solcVersion": "0.8.28",
+  "solcLongVersion": "0.8.28+commit.7893614a",
+  "userSourceNameMap": {
+    "contracts/Voter.sol": "project/contracts/Voter.sol"
+  },
+  "input": {
+    "language": "Solidity",
+    "settings": {
+      "evmVersion": "cancun",
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ],
+          "*": [
+            "abi",
+            "evm.bytecode",
+            "evm.deployedBytecode",
+            "evm.methodIdentifiers",
+            "metadata"
+          ]
+        }
+      },
+      "remappings": []
+    },
+    "sources": {
+      "project/contracts/Voter.sol": {
+        "content": "pragma solidity ^0.8.28;\n\ncontract Voter {\n    // A struct in solidity is like a custom data type similar to an object in js it group related peices of data into one object\n    struct Candidate {\n        uint id;\n        string name;\n        uint voteCount;\n    }\n\n    struct Poll {\n        uint id;\n        string title;\n        //mapping is like a key-value store\n        //first is key secound is value\n        mapping(uint => Candidate) candidates;\n        uint candidatesCount;\n        mapping(address => bool) voters;\n        bool active;\n    }\n\n    struct PollInfo {\n        uint id;\n        string title;\n        uint candidatesCount;\n        bool active;\n    }\n\n    //store all polls like a dictionary\n    mapping(uint => Poll) public polls;\n    uint public pollsCount;\n\n    //like a logger message stored on blochkchain\n    event PollCreated(uint pollId, string title);\n    event Voted(uint pollId, address voter, uint candidateId);\n\n    //storage → permanent on blockchain\n    //memory → temporary, function-lifetime\n    //calldata → temporary, read-only, cheaper\n\n    //Value types → don’t need memory/storage.\n    //Reference types → must explicitly use memory, storage, or calldata.\n\n    //create a new poll with candidates name\n    function createPoll(\n        string calldata title,\n        string[] calldata candidateNames\n    ) public {\n        pollsCount++;\n        Poll storage p = polls[pollsCount];\n        p.id = pollsCount;\n        p.title = title;\n        p.active = true;\n\n        for (uint i = 0; i < candidateNames.length; i++) {\n            p.candidatesCount++;\n            p.candidates[p.candidatesCount] = Candidate(\n                p.candidatesCount,\n                candidateNames[i],\n                0\n            );\n        }\n\n        //when you emit an event it get written in a blockchain logs\n        //Apps outside the blockchain can watch for it and react.\n        emit PollCreated(pollsCount, title);\n    }\n\n    function vote(uint pollId, uint candidateId) public {\n        Poll storage p = polls[pollId];\n        require(p.active, \"Poll not active\");\n        require(!p.voters[msg.sender], \"Already voted in this Poll\");\n        require(\n            candidateId > 0 && candidateId <= p.candidatesCount,\n            \"Invalid Candidate\"\n        );\n\n        p.voters[msg.sender] = true;\n        p.candidates[candidateId].voteCount++;\n\n        emit Voted(pollId, msg.sender, candidateId);\n    }\n\n    //get all polls\n\n    function getAllPolls() public view returns (PollInfo[] memory) {\n        PollInfo[] memory result = new PollInfo[](pollsCount);\n        for (uint i = 1; i <= pollsCount; i++) {\n            Poll storage p = polls[i];\n            result[i - 1] = PollInfo({\n                id: p.id,\n                title: p.title,\n                candidatesCount: p.candidatesCount,\n                active: p.active\n            });\n        }\n        return result;\n    }\n\n    //get candidated list from a poll\n    function getPollCandidates(\n        uint pollId\n    ) public view returns (Candidate[] memory) {\n        Poll storage p = polls[pollId];\n        Candidate[] memory result = new Candidate[](p.candidatesCount);\n\n        for (uint i = 1; i <= p.candidatesCount; i++) {\n            result[i - 1] = p.candidates[i];\n        }\n\n        return result;\n    }\n\n    //get candidate details from a poll\n    function getCandidate(\n        uint pollId,\n        uint candidateId\n    ) public view returns (uint, string memory, uint) {\n        Poll storage p = polls[pollId];\n        require(\n            candidateId > 0 && candidateId <= p.candidatesCount,\n            \"Invalid candidate\"\n        );\n        Candidate memory c = p.candidates[candidateId];\n        return (c.id, c.name, c.voteCount);\n    }\n\n    //get number of candidates in a poll\n    function getCandidateCount(uint pollId) public view returns (uint) {\n        return polls[pollId].candidatesCount;\n    }\n\n    // deactivate poll\n    function closePoll(uint pollId) public {\n        polls[pollId].active = false;\n    }\n}\n"
+      }
+    }
+  }
+}

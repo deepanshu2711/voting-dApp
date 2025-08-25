@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { PollCard } from "@/components/poll-card";
 import { RefreshCw, Vote, AlertCircle } from "lucide-react";
+import { ethers } from "ethers";
+import VoterContract from "../../../ignition/deployments/chain-31337/artifacts/VoterModule#Voter.json";
+import { BrowserProvider } from "ethers";
 
 const mockPolls = [
   {
@@ -37,13 +40,17 @@ const mockPolls = [
     totalVotes: 89,
     candidates: [
       { id: 0, name: "PostgreSQL", voteCount: 34 },
-      { id: 1, name: "MongoDB", voteCount: 28 },
+      { id: 1, nearme: "MongoDB", voteCount: 28 },
       { id: 2, name: "MySQL", voteCount: 27 },
     ],
   },
 ];
 
-export function PollsList() {
+interface PollsListInterface {
+  CONTRACT_ADDRESS: string;
+  provider: BrowserProvider;
+}
+export function PollsList({ CONTRACT_ADDRESS, provider }: PollsListInterface) {
   const [polls, setPolls] = useState(mockPolls);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -58,8 +65,18 @@ export function PollsList() {
       }
       setError(null);
 
-      // Simulate loading delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // NOTE: fetch polls here
+
+      const contract = new ethers.Contract(
+        CONTRACT_ADDRESS,
+        VoterContract.abi,
+        provider
+      );
+
+      console.log(contract);
+
+      const polls = await contract.getAllPolls();
+      console.log(polls);
 
       setPolls(mockPolls);
     } catch (err) {

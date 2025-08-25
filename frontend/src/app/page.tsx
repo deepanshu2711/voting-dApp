@@ -13,7 +13,8 @@ export default function HomePage() {
   const [activeTab, setActiveTab] = useState<"polls" | "create" | "results">(
     "polls"
   );
-  const { connect, address } = useConnectWallet();
+  const { connect, address, provider } = useConnectWallet();
+  const CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 
   return (
     <div className="min-h-screen bg-background">
@@ -63,11 +64,18 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="flex justify-center">
-              {activeTab === "polls" && <PollsList />}
-              {activeTab === "create" && <CreatePollForm />}
-              {activeTab === "results" && <ResultsDashboard />}
-            </div>
+            {provider && (
+              <div className="flex justify-center">
+                {activeTab === "polls" && (
+                  <PollsList
+                    CONTRACT_ADDRESS={CONTRACT_ADDRESS}
+                    provider={provider}
+                  />
+                )}
+                {activeTab === "create" && <CreatePollForm />}
+                {activeTab === "results" && <ResultsDashboard />}
+              </div>
+            )}
           </div>
         )}
       </div>
