@@ -14,7 +14,7 @@ export default function HomePage() {
     "polls"
   );
   const { connect, address, provider } = useConnectWallet();
-  const CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+  const CONTRACT_ADDRESS = "0x56E879BF8C15540E7A49e865a1940fde4E217142";
 
   return (
     <div className="min-h-screen bg-background">

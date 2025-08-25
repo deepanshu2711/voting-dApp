@@ -1,3 +1,4 @@
+import { BrowserProvider } from "ethers";
 import { ethers } from "ethers";
 import { useState } from "react";
 
@@ -9,6 +10,7 @@ declare global {
 
 export const useConnectWallet = () => {
   const [address, setAddress] = useState<string | null>(null);
+  const [provider, setProvider] = useState<BrowserProvider | null>(null);
 
   const connect = async () => {
     try {
@@ -17,10 +19,11 @@ export const useConnectWallet = () => {
         const signer = await provider.getSigner();
         const address = await signer.getAddress();
         setAddress(address);
+        setProvider(provider);
       }
     } catch (e) {
       console.log(e);
     }
   };
-  return { connect, address };
+  return { connect, address, provider };
 };
